@@ -2,7 +2,6 @@
   "name": "sql-employee-tracker",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -20,7 +19,7 @@
   "homepage": "https://github.com/dkpatzer/SQL-Employee-Tracker#readme",
   "dependencies": {
     "console.table": "^0.10.0",
-    "inquirer": "^8.2.5",
+    "inquirer": "^8.2.4",
     "mysql": "^2.18.1",
     "mysql2": "^3.4.3"
   }
