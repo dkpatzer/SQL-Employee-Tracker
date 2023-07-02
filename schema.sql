@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS employee_tracker;
 CREATE DATABASE sql_employee_tracker;
 USE sql_employee_tracker;
 CREATE TABLE department (
