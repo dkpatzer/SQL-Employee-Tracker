@@ -8,8 +8,8 @@ const getConnection = async () => {
       host: 'localhost',
       port: 3306,
       user: 'root',
-      password: 'your_password',
-      database: 'your_database',
+      password: 'Password1',
+      database: 'sql_employee_tracker',
     });
     return connection;
   } catch (error) {

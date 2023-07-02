@@ -1,4 +1,4 @@
-const { getConnection } = require('./database');
+const getConnection = require('./database');
 const { startApp } = require('./app');
 
 // Connect to the database and start the application
@@ -10,3 +10,4 @@ getConnection()
   .catch((error) => {
     console.error('Error:', error);
   });
+
