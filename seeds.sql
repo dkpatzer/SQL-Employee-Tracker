@@ -21,16 +21,18 @@ VALUES
 ('Grants Coordinator', 55000, 4);
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
-VALUES 
+VALUES
 ('John', 'Smith', 1, NULL), -- Medical Office Manager
-('Emily', 'Johnson', 2, 1), -- Medical Billing Specialist
-('Michael', 'Williams', 3, 1), -- Medical Records Coordinator
-('Jessica', 'Brown', 4, 2), -- Office Administrator
-('David', 'Taylor', 5, 2), -- Insurance Coordinator
-('Sarah', 'Davis', 6, 2), -- Front Desk Receptionist
-('Robert', 'Miller', 7, 3), -- Laboratory Manager
-('Jennifer', 'Anderson', 8, 3), -- Laboratory Technician Supervisor
-('Daniel', 'Martinez', 9, 3), -- Laboratory Assistant
-('Michelle', 'Garcia', 10, 4), -- Research Coordinator
-('Christopher', 'Lopez', 11, 4), -- Clinical Trials Administrator
-('Laura', 'Hernandez', 12, 4); -- Grants Coordinator
+('Emily', 'Johnson', 2, 1), -- Medical Billing Specialist with manager ID 1
+('Michael', 'Williams', 3, 1), -- Medical Records Coordinator with manager ID 1
+('Jessica', 'Brown', 4, 4), -- Office Administrator with manager ID 4
+('David', 'Taylor', 5, 4), -- Insurance Coordinator with manager ID 4
+('Sarah', 'Davis', 6, 4), -- Front Desk Receptionist with manager ID 4
+('Robert', 'Miller', 7, 7), -- Laboratory Manager with manager ID 7
+('Jennifer', 'Anderson', 8, 7), -- Laboratory Technician Supervisor with manager ID 7
+('Daniel', 'Martinez', 9, 7), -- Laboratory Assistant with manager ID 7
+('Michelle', 'Garcia', 10, 10), -- Research Coordinator with manager ID 10
+('Christopher', 'Lopez', 11, 10), -- Clinical Trials Administrator with manager ID 10
+('Laura', 'Hernandez', 12, 10); -- Grants Coordinator with manager ID 10
+
+

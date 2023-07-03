@@ -126,6 +126,9 @@ const addAnEmployee = async (connection) => {
               if (err) throw err;
             }
           );
+          console.log('Roles:', roles);
+          console.log('Employees:', employees);
+          
           console.log(
             `\n ${response.firstName} ${response.lastName} successfully added to database! \n`
           );
