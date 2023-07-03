@@ -41,7 +41,8 @@ async function addDepartment(connection) {
 }
 
 // Function to add a role
-async function addRole(connection) {
+// Add a role
+const addRole = (connection) => {
   inquirer
     .prompt([
       {
@@ -51,92 +52,91 @@ async function addRole(connection) {
       },
       {
         name: 'salary',
-        type: 'number',
+        type: 'input',
         message: 'Enter the role salary:',
       },
       {
-        name: 'departmentId',
-        type: 'number',
+        name: 'department_id',
+        type: 'input',
         message: 'Enter the department ID for the role:',
       },
     ])
-    .then(async (answers) => {
-      try {
-        await connection.query('INSERT INTO roles SET ?', {
-          title: answers.title,
-          salary: answers.salary,
-          department_id: answers.departmentId,
-        });
-        console.log('Role added successfully!');
-      } catch (error) {
-        console.error('Error:', error);
-      }
+    .then((answer) => {
+      const { title, salary, department_id } = answer;
+      const sql = `INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`;
+      const values = [title, salary, department_id];
+
+      connection.query(sql, values, (err, result) => {
+        if (err) {
+          console.error('Error:', err);
+        } else {
+          console.log('Role added successfully!');
+        }
+        startApp(connection);
+      });
     })
     .catch((error) => {
       console.error('Error:', error);
+      startApp(connection);
     });
-}
+};
+
 
 // Function to add an employee
-const addAnEmployee = async (connection) => {
-  connection.query(`SELECT * FROM role;`, (err, res) => {
-    if (err) throw err;
-    let roles = res.map((role) => ({ name: role.title, value: role.role_id }));
-    connection.query(`SELECT * FROM employee;`, (err, res) => {
-      if (err) throw err;
-      let employees = res.map((employee) => ({
-        name: employee.first_name + ' ' + employee.last_name,
-        value: employee.employee_id,
-      }));
-      inquirer
-        .prompt([
-          {
-            name: 'firstName',
-            type: 'input',
-            message: "What is the new employee's first name?",
-          },
-          {
-            name: 'lastName',
-            type: 'input',
-            message: "What is the new employee's last name?",
-          },
-          {
-            name: 'role',
-            type: 'rawlist',
-            message: "What is the new employee's title?",
-            choices: roles,
-          },
-          {
-            name: 'manager',
-            type: 'rawlist',
-            message: "Who is the new employee's manager?",
-            choices: employees,
-          },
-        ])
-        .then((response) => {
-          connection.query(
-            `INSERT INTO employee SET ?`,
-            {
-              first_name: response.firstName,
-              last_name: response.lastName,
-              role_id: response.role,
-              manager_id: response.manager,
-            },
-            (err, res) => {
-              if (err) throw err;
-            }
-          );
-          console.log('Roles:', roles);
-          console.log('Employees:', employees);
-          
-          console.log(
-            `\n ${response.firstName} ${response.lastName} successfully added to database! \n`
-          );
-          startApp(connection);
-        });
+
+// Add an employee
+const addAnEmployee = (connection) => {
+  return inquirer
+    .prompt([
+      {
+        name: 'first_name',
+        type: 'input',
+        message: "Enter the employee's first name:",
+      },
+      {
+        name: 'last_name',
+        type: 'input',
+        message: "Enter the employee's last name:",
+      },
+      {
+        name: 'role_id',
+        type: 'input',
+        message: "Enter the employee's role ID:",
+      },
+      {
+        name: 'manager_id',
+        type: 'input',
+        message: "Enter the employee's manager ID:",
+      },
+    ])
+    .then((answer) => {
+      const { first_name, last_name, role_id, manager_id } = answer;
+      const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+      const values = [first_name, last_name, role_id, manager_id];
+
+      return connection.promise().query(sql, values);
+    })
+    .then(([rows]) => {
+      console.log('Employee added successfully!');
+      return rows;
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      throw error;
     });
-  });
 };
+
+module.exports = {
+  addAnEmployee,
+  updateEmployeeRole,
+  updateManager,
+  removeDepartment,
+  removeRole,
+  removeEmployee,
+  viewDepartmentSalary,
+};
+
+
 
 // Function to update an employee role
 const updateEmployeeRole = async (connection) => {
