@@ -1,5 +1,5 @@
 const inquirer = require('inquirer');
-const { addAnEmployee, updateEmployeeRole, updateManager, removeDepartment, removeRole, removeEmployee, viewDepartmentSalary } = require('./query');
+const { addEmployee, updateEmployeeRole, updateManager, removeDepartment, removeRole, removeEmployee, viewDepartmentSalary } = require('./query');
 
 // Fetch the list of employees (replace this with your actual implementation)
 const fetchEmployees = () => {
@@ -28,7 +28,8 @@ const startApp = (connection) => {
           'Update an employee role',
           {
             name: 'Update an employee manager',
-            choices: employees.map((employee) => ({ name: employee.name, value: employee.employee_id })),
+            choices: employee.map((employee) => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.employee_id })),
+
           },
           'Remove a department',
           'Remove a role',

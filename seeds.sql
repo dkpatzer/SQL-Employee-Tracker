@@ -1,4 +1,4 @@
-INSERT INTO department (name)
+INSERT INTO department (department_id, department_name)
 VALUES 
 ('Medical Services Department'),
 ('Administrative Department'),
@@ -25,13 +25,13 @@ VALUES
 ('John', 'Smith', 1, NULL), -- Medical Office Manager
 ('Emily', 'Johnson', 2, 1), -- Medical Billing Specialist with manager ID 1
 ('Michael', 'Williams', 3, 1), -- Medical Records Coordinator with manager ID 1
-('Jessica', 'Brown', 4, 4), -- Office Administrator with manager ID 4
+('Jessica', 'Brown', 4, NULL), -- Office Administrator with manager ID 4
 ('David', 'Taylor', 5, 4), -- Insurance Coordinator with manager ID 4
 ('Sarah', 'Davis', 6, 4), -- Front Desk Receptionist with manager ID 4
 ('Robert', 'Miller', 7, 7), -- Laboratory Manager with manager ID 7
 ('Jennifer', 'Anderson', 8, 7), -- Laboratory Technician Supervisor with manager ID 7
 ('Daniel', 'Martinez', 9, 7), -- Laboratory Assistant with manager ID 7
-('Michelle', 'Garcia', 10, 10), -- Research Coordinator with manager ID 10
+('Michelle', 'Garcia', 10, null), -- Research Coordinator with manager ID 10
 ('Christopher', 'Lopez', 11, 10), -- Clinical Trials Administrator with manager ID 10
 ('Laura', 'Hernandez', 12, 10); -- Grants Coordinator with manager ID 10
 

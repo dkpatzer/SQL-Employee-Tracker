@@ -18,30 +18,35 @@ const getConnection = async () => {
 };
 
 // Function to add a department
-async function addDepartment(connection) {
+const addDepartment = (connection) => {
   inquirer
     .prompt({
       name: 'department',
       type: 'input',
       message: 'Enter the department name:',
     })
-    .then(async (answer) => {
-      try {
-        await connection.query('INSERT INTO departments SET ?', {
-          dept_name: answer.department,
-        });
-        console.log('Department added successfully!');
-      } catch (error) {
-        console.error('Error:', error);
-      }
+    .then((answer) => {
+      const { department } = answer;
+      const sql = `INSERT INTO department (name) VALUES (?)`;
+      const values = [department];
+
+      connection.query(sql, values, (err, result) => {
+        if (err) {
+          console.error('Error:', err);
+        } else {
+          console.log('Department added successfully!');
+        }
+        startApp(connection);
+      });
     })
     .catch((error) => {
       console.error('Error:', error);
+      startApp(connection);
     });
-}
+};
+
 
 // Function to add a role
-// Add a role
 const addRole = (connection) => {
   inquirer
     .prompt([
@@ -82,10 +87,11 @@ const addRole = (connection) => {
 };
 
 
+
 // Function to add an employee
 
 // Add an employee
-const addAnEmployee = (connection) => {
+const addEmployee = (connection) => {
   return inquirer
     .prompt([
       {
@@ -125,17 +131,6 @@ const addAnEmployee = (connection) => {
       throw error;
     });
 };
-
-module.exports = {
-  addAnEmployee,
-  updateEmployeeRole,
-  updateManager,
-  removeDepartment,
-  removeRole,
-  removeEmployee,
-  viewDepartmentSalary,
-};
-
 
 
 // Function to update an employee role
@@ -392,6 +387,16 @@ const viewDepartmentSalary = async (connection) => {
   );
 };
 
+module.exports = {
+  addEmployee,
+  updateEmployeeRole,
+  updateManager,
+  removeDepartment,
+  removeRole,
+  removeEmployee,
+  viewDepartmentSalary,
+};
+
 // Connect to the database and start the application
 getConnection()
   .then((connection) => {
@@ -434,7 +439,7 @@ function startApp(connection) {
           addRole(connection);
           break;
         case 'Add an employee':
-          addAnEmployee(connection);
+          addEmployee(connection);
           break;
         case 'View all departments':
           viewAllDepartments(connection);
@@ -481,7 +486,7 @@ function startApp(connection) {
 // Function to view all departments
 async function viewAllDepartments(connection) {
   try {
-    const [rows] = await connection.query('SELECT * FROM departments');
+    const [rows] = await connection.query('SELECT * FROM department');
     console.table('\n', rows, '\n');
     startApp(connection);
   } catch (error) {
@@ -492,7 +497,7 @@ async function viewAllDepartments(connection) {
 // Function to view all roles
 async function viewAllRoles(connection) {
   try {
-    const [rows] = await connection.query('SELECT * FROM roles');
+    const [rows] = await connection.query('SELECT * FROM role');
     console.table('\n', rows, '\n');
     startApp(connection);
   } catch (error) {
@@ -503,7 +508,7 @@ async function viewAllRoles(connection) {
 // Function to view all employees
 async function viewAllEmployees(connection) {
   try {
-    const [rows] = await connection.query('SELECT * FROM employees');
+    const [rows] = await connection.query('SELECT * FROM employee');
     console.table('\n', rows, '\n');
     startApp(connection);
   } catch (error) {
