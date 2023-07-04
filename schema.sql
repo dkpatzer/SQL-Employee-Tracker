@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS role;
 DROP TABLE IF EXISTS department;
 
 
-CREATE DATABASE sql_employee_tracker;
+-- CREATE DATABASE sql_employee_tracker;
 
 USE sql_employee_tracker;
 

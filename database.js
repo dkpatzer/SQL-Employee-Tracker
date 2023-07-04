@@ -16,7 +16,9 @@ const getConnection = async () => {
       user: connection.config.user,
       database: connection.config.database,
     });
-    
+
+    // Convert connection.query to a promise-based function
+    connection.query = util.promisify(connection.query);
 
     // Test the connection with a simple query
     const [rows] = await connection.query('SELECT 1');
@@ -25,9 +27,11 @@ const getConnection = async () => {
     return connection;
   } catch (error) {
     console.error('Error:', error);
+    throw error;
   }
 };
 
 module.exports = getConnection;
+
 
 

@@ -1,21 +1,3 @@
-const inquirer = require('inquirer');
-const mysql = require('mysql2/promise');
-
-// Function to establish a database connection
-const getConnection = async () => {
-  try {
-    const connection = await mysql.createConnection({
-      host: 'localhost',
-      port: 3306,
-      user: 'root',
-      password: 'Password1',
-      database: 'sql_employee_tracker',
-    });
-    return connection;
-  } catch (error) {
-    console.error('Error:', error);
-  }
-};
 
 // Function to add a department
 const addDepartment = (connection) => {
@@ -90,7 +72,7 @@ const addRole = (connection) => {
 
 // Function to add an employee
 
-// Add an employee
+
 const addEmployee = (connection) => {
   return inquirer
     .prompt([
@@ -397,121 +379,3 @@ module.exports = {
   viewDepartmentSalary,
 };
 
-// Connect to the database and start the application
-getConnection()
-  .then((connection) => {
-    console.log('Connected to the MySQL database.');
-    startApp(connection);
-  })
-  .catch((error) => {
-    console.error('Error:', error);
-  });
-
-// Function to start the application
-function startApp(connection) {
-  inquirer
-    .prompt({
-      name: 'action',
-      type: 'list',
-      message: 'What would you like to do?',
-      choices: [
-        'Add a department',
-        'Add a role',
-        'Add an employee',
-        'View all departments',
-        'View all roles',
-        'View all employees',
-        'Update an employee role',
-        'Update an employee manager',
-        'Remove a department',
-        'Remove a role',
-        'Remove an employee',
-        'View the total utilized budget of a department',
-        'Exit',
-      ],
-    })
-    .then((answer) => {
-      switch (answer.action) {
-        case 'Add a department':
-          addDepartment(connection);
-          break;
-        case 'Add a role':
-          addRole(connection);
-          break;
-        case 'Add an employee':
-          addEmployee(connection);
-          break;
-        case 'View all departments':
-          viewAllDepartments(connection);
-          break;
-        case 'View all roles':
-          viewAllRoles(connection);
-          break;
-        case 'View all employees':
-          viewAllEmployees(connection);
-          break;
-        case 'Update an employee role':
-          updateEmployeeRole(connection);
-          break;
-        case 'Update an employee manager':
-          updateManager(connection);
-          break;
-        case 'Remove a department':
-          removeDepartment(connection);
-          break;
-        case 'Remove a role':
-          removeRole(connection);
-          break;
-        case 'Remove an employee':
-          removeEmployee(connection);
-          break;
-        case 'View the total utilized budget of a department':
-          viewDepartmentSalary(connection);
-          break;
-        case 'Exit':
-          console.log('Goodbye!');
-          connection.end();
-          break;
-        default:
-          console.log('Invalid action');
-          startApp(connection);
-          break;
-      }
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-    });
-}
-
-// Function to view all departments
-async function viewAllDepartments(connection) {
-  try {
-    const [rows] = await connection.query('SELECT * FROM department');
-    console.table('\n', rows, '\n');
-    startApp(connection);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
-
-// Function to view all roles
-async function viewAllRoles(connection) {
-  try {
-    const [rows] = await connection.query('SELECT * FROM role');
-    console.table('\n', rows, '\n');
-    startApp(connection);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
-
-// Function to view all employees
-async function viewAllEmployees(connection) {
-  try {
-    const [rows] = await connection.query('SELECT * FROM employee');
-    console.table('\n', rows, '\n');
-    startApp(connection);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
