@@ -1,4 +1,6 @@
-const mysql = require('mysql2/promise');
+const util = require('util');
+const mysql = require('mysql2');
+
 
 const getConnection = async () => {
   try {
@@ -17,11 +19,11 @@ const getConnection = async () => {
       database: connection.config.database,
     });
 
-    // Convert connection.query to a promise-based function
-    connection.query = util.promisify(connection.query);
+    // Promisify the connection query method
+    connection.query = util.promisify(connection.query).bind(connection);
 
     // Test the connection with a simple query
-    const [rows] = await connection.query('SELECT 1');
+    await connection.query('SELECT 1');
     console.log('MySQL connection test successful.');
 
     return connection;
@@ -31,7 +33,16 @@ const getConnection = async () => {
   }
 };
 
-module.exports = getConnection;
+module.exports = {
+  getConnection: getConnection,
+};
+
+
+
+
+
+
+
 
 
 

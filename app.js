@@ -1,5 +1,6 @@
+const { addEmployee, updateEmployeeRole } = require('./queries');
 const { promisify } = require('util');
-const mysql = require('mysql2/promise');
+const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const {
   addEmployee,
@@ -10,32 +11,23 @@ const {
   removeEmployee,
   viewDepartmentSalary,
 } = require('./query');
+const { getConnection } = require('./database');
 
-// Function to establish a database connection
-const getConnection = async () => {
+
+// Function to fetch the list of employees
+const fetchEmployees = async (connection) => {
   try {
-    const connection = await mysql.createConnection({
-      host: 'localhost',
-      port: 3306,
-      user: 'root',
-      password: 'Password1',
-      database: 'sql_employee_tracker',
-    });
-    return connection;
+    const [rows] = await connection.query('SELECT * FROM employee');
+    console.log('Fetched employees:', rows); // Add this line
+    return rows;
   } catch (error) {
-    console.error('Error:', error);
     throw error;
   }
 };
 
-// Function to fetch the list of employees
-const fetchEmployees = (connection) => {
-  return connection.promise().query('SELECT * FROM employee')
-    .then(([rows]) => rows)
-    .catch((error) => {
-      throw error;
-    });
-};
+
+
+
 
 // Start the application
 const startApp = (connection) => {
@@ -155,6 +147,9 @@ getConnection()
     console.error('Error:', error);
   });
 
-
+  module.exports = {
+    startApp,
+  };
+  
 
 

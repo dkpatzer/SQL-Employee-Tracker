@@ -1,3 +1,5 @@
+const { addEmployee, updateEmployeeRole } = require('./queries');
+const { startApp } = require('./app');
 
 // Function to add a department
 const addDepartment = (connection) => {
