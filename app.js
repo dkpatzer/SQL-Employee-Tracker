@@ -1,7 +1,7 @@
-const { promisify } = require('util');
-const mysql = require('mysql2');
+//require db variable from database.js
+const db = require('./db');
 const inquirer = require('inquirer');
-const { getConnection } = require('./database');
+const cTable = require('console.table');
 const {
   addDepartment,
   addRole,
