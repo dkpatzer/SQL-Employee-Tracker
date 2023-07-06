@@ -1,166 +1,135 @@
-//require db variable from database.js
-const db = require('./db');
-const inquirer = require('inquirer');
-const cTable = require('console.table');
-const {
-  addDepartment,
-  addRole,
-  addEmployee,
-  updateEmployeeRole,
-  updateManager,
-  removeDepartment,
-  removeRole,
-  removeEmployee,
-  viewDepartmentSalary,
-} = require('./queries');
+const connection = require('./db/database');
 
-const startApp = (connection) => {
-  const fetchEmployees = async (connection) => {
-    try {
-      const [rows] = await connection.query('SELECT * FROM employee');
-      console.table('\n', rows, '\n');
-      startApp(connection);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-  
-  const fetchRoles = async (connection) => {
-    try {
-      const [rows] = await connection.query('SELECT * FROM role');
-      console.table('\n', rows, '\n');
-      startApp(connection);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-  
-  const fetchDepartments = async (connection) => {
-    try {
-      const [rows] = await connection.query('SELECT * FROM department');
-      console.table('\n', rows, '\n');
-      startApp(connection);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-  
-  fetchEmployees(connection);
-  fetchRoles(connection);
-  fetchDepartments(connection);
 
-  const viewAllDepartments = async () => {
-    try {
-      const [rows] = await connection.query('SELECT * FROM department');
-      console.table('\n', rows, '\n');
-      startApp(connection);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
+class EmployeeDatabase {
+  constructor(connection) {
+    this.connection = connection;
+  }
 
-  const viewAllRoles = async () => {
-    try {
-      const [rows] = await connection.query('SELECT * FROM role');
-      console.table('\n', rows, '\n');
-      startApp(connection);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
+  // Methods
 
-  const viewAllEmployees = async () => {
-    try {
-      const [rows] = await connection.query('SELECT * FROM employee');
-      console.table('\n', rows, '\n');
-      startApp(connection);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
+  getDepartments() {
+    return this.connection.promise().query(
+      "SELECT * FROM department"
+    );
+  }
 
-  inquirer
-    .prompt({
-      name: 'action',
-      type: 'list',
-      message: 'What would you like to do?',
-      choices: [
-        'Add a department',
-        'Add a role',
-        'Add an employee',
-        'Update an employee role',
-        'Update an employee manager',
-        'Remove a department',
-        'Remove a role',
-        'Remove an employee',
-        'View department salary',
-        'View all departments',
-        'View all roles',
-        'View all employees',
-        'Exit',
-      ],
-    })
-    .then((answer) => {
-      // Handle user's selection
-      switch (answer.action) {
-        case 'Add a department':
-          addDepartment(connection);
-          break;
-        case 'Add a role':
-          addRole(connection);
-          break;
-        case 'Add an employee':
-          addEmployee(connection);
-          break;
-        case 'Update an employee role':
-          updateEmployeeRole(connection);
-          break;
-        case 'Update an employee manager':
-          updateManager(connection);
-          break;
-        case 'Remove a department':
-          removeDepartment(connection);
-          break;
-        case 'Remove a role':
-          removeRole(connection);
-          break;
-        case 'Remove an employee':
-          removeEmployee(connection);
-          break;
-        case 'View department salary':
-          viewDepartmentSalary(connection);
-          break;
-        case 'View all departments':
-          viewAllDepartments();
-          break;
-        case 'View all roles':
-          viewAllRoles();
-          break;
-        case 'View all employees':
-          viewAllEmployees();
-          break;
-        case 'Exit':
-          console.log('Goodbye!');
-          connection.end();
-          break;
-        default:
-          console.log('Invalid action');
-          break;
-      }
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-    });
-};
+  getRoles() {
+    return this.connection.promise().query(
+      `SELECT role.id, role.title, department.name AS department, role.salary
+        FROM role
+        LEFT JOIN department 
+        ON role.department_id = department.id`
+    );
+  }
 
-getConnection()
-  .then((connection) => {
-    console.log('Connected to the MySQL database.');
-    startApp(connection);
-  })
-  .catch((error) => {
-    console.error('Error connecting to the database:', error);
-  });
+  getEmployees() {
+    return this.connection.promise().query(
+      `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager 
+        FROM employee 
+        LEFT JOIN role 
+        ON employee.role_id = role.id 
+        LEFT JOIN department 
+        ON role.department_id = department.id 
+        LEFT JOIN employee manager 
+        ON manager.id = employee.manager_id;`
+    );
+  }
+
+  getManager() {
+    return this.connection.promise().query(
+      "SELECT * FROM employee"
+    );
+  }
+
+  addDepartment(name) {
+    return this.connection.promise().query(
+      `INSERT INTO department(name) 
+        VALUES (?)`,
+      name
+    );
+  }
+
+  addRole(title, salary, department_id) {
+    return this.connection.promise().query(
+      `INSERT INTO role(title, salary, department_id) 
+        VALUES (?, ?, ?)`,
+      [title, salary, department_id]
+    );
+  }
+
+  addEmployee(first_name, last_name, role_id, manager_id) {
+    return this.connection.promise().query(
+      `INSERT INTO employee(first_name, last_name, role_id, manager_id) 
+        VALUES (?, ?, ?, ?)`,
+      [first_name, last_name, role_id, manager_id]
+    );
+  }
+
+  updateRole(employee_id, role_id) {
+    return this.connection.promise().query(
+      `UPDATE employee SET role_id = ? WHERE id = ?`,
+      [role_id, employee_id]
+    );
+  }
+
+  updateManager(employee_id, manager_id) {
+    return this.connection.promise().query(
+      `UPDATE employee SET manager_id = ? WHERE id = ?`,
+      [manager_id, employee_id]
+    );
+  }
+
+  viewByManager(manager_id) {
+    return this.connection.promise().query(
+      `SELECT employee.id, employee.first_name, employee.last_name, department.name AS department, role.title 
+        FROM employee 
+        LEFT JOIN role 
+        ON role.id = employee.role_id 
+        LEFT JOIN department 
+        ON department.id = role.department_id 
+        WHERE manager_id = ?`,
+      manager_id
+    );
+  }
+
+  viewByDepartment(department_id) {
+    return this.connection.promise().query(
+      `SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary 
+        FROM employee 
+        LEFT JOIN role 
+        ON role.id = employee.role_id 
+        LEFT JOIN department 
+        ON department.id = role.department_id 
+        WHERE department.id = ?`,
+      department_id
+    );
+  }
+
+  deleteDepartment(id) {
+    return this.connection.promise().query(
+      `DELETE FROM department WHERE id = ?`,
+      id
+    );
+  }
+
+  deleteRole(id) {
+    return this.connection.promise().query(
+      `DELETE FROM role WHERE id = ?`,
+      id
+    );
+  }
+
+  deleteEmployee(id) {
+    return this.connection.promise().query(
+      `DELETE FROM employee WHERE id = ?`,
+      id
+    );
+  }
+}
+
+module.exports = new EmployeeDatabase(connection);
+
 
 
 

@@ -1,441 +1,352 @@
 //require db variable from database.js
 const db = require('./db');
 const inquirer = require('inquirer');
-const cTable = require('console.table')
+const cTable = require('console.table');
 
-
-//prompt user
-const startNewPrompt = () => {
-  console.log("start")
-  inquirer.prompt([{
-    type: 'list',
-    name: 'initialPrompt',
-    message: 'What would you like to do?',
-    choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Update an employee manager', 'View employees by manager', 'View employees by department', 'Delete a department', 'Delete a role', 'Delete an employee'],
-  }])
-    .then(answer => {
-      if (answer.initialPrompt == 'View all departments') {
-        return viewDepartments();
-
-      } else if (answer.initialPrompt == 'View all roles') {
-        return viewRoles();
-
-      } else if (answer.initialPrompt == 'View all employees') {
-        return viewEmployees();
-
-      } else if (answer.initialPrompt == 'Add a department') {
-        return addDepartment();
-
-      } else if (answer.initialPrompt == 'Add a role') {
-        return addRole();
-
-      } else if (answer.initialPrompt == 'Add an employee') {
-        return addEmployee();
-
-      } else if (answer.initialPrompt == 'Update an employee role') {
-        return updateRole();
-
-      } else if (answer.initialPrompt == 'Update an employee manager') {
-        return updateManager();
-
-      } else if (answer.initialPrompt == 'View employees by manager') {
-        return viewByManager();
-
-      } else if (answer.initialPrompt == 'View employees by department') {
-        return viewByDepartment();
-
-      } else if (answer.initialPrompt == 'Delete a department') {
-        return deleteDepartment();
-
-      } else if (answer.initialPrompt == 'Delete a role') {
-        return deleteRole();
-
-      } else if (answer.initialPrompt == 'Delete an employee') {
-        return deleteEmployee();
-
-      } else {
-        console.log('Please select an action!');
-        return false;
-      }
-    })
-};
-
-// Function to add a department
-const addDepartment = (connection) => {
-  inquirer
-    .prompt({
-      name: 'department',
-      type: 'input',
-      message: 'Enter the department name:',
-    })
-    .then((answer) => {
-      const { department } = answer;
-      const sql = `INSERT INTO department (name) VALUES (?)`;
-      const values = [department];
-
-      connection.query(sql, values, (err, result) => {
-        if (err) {
-          console.error('Error:', err);
-        } else {
-          console.log('Department added successfully!');
-        }
-        startApp(connection);
-      });
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-      startApp(connection);
-    });
-};
-
-
-// Function to add a role
-const addRole = (connection) => {
-  inquirer
-    .prompt([
-      {
-        name: 'title',
-        type: 'input',
-        message: 'Enter the role title:',
-      },
-      {
-        name: 'salary',
-        type: 'input',
-        message: 'Enter the role salary:',
-      },
-      {
-        name: 'department_id',
-        type: 'input',
-        message: 'Enter the department ID for the role:',
-      },
-    ])
-    .then((answer) => {
-      const { title, salary, department_id } = answer;
-      const sql = `INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`;
-      const values = [title, salary, department_id];
-
-      connection.query(sql, values, (err, result) => {
-        if (err) {
-          console.error('Error:', err);
-        } else {
-          console.log('Role added successfully!');
-        }
-        startApp(connection);
-      });
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-      startApp(connection);
-    });
-};
-
-
-
-// Function to add an employee
-
-
-const addEmployee = (connection) => {
-  return inquirer
-    .prompt([
-      {
-        name: 'first_name',
-        type: 'input',
-        message: "Enter the employee's first name:",
-      },
-      {
-        name: 'last_name',
-        type: 'input',
-        message: "Enter the employee's last name:",
-      },
-      {
-        name: 'role_id',
-        type: 'input',
-        message: "Enter the employee's role ID:",
-      },
-      {
-        name: 'manager_id',
-        type: 'input',
-        message: "Enter the employee's manager ID:",
-      },
-    ])
-    .then((answer) => {
-      const { first_name, last_name, role_id, manager_id } = answer;
-      const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
-      const values = [first_name, last_name, role_id, manager_id];
-
-      return connection.promise().query(sql, values);
-    })
-    .then(([rows]) => {
-      console.log('Employee added successfully!');
-      return rows;
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-      throw error;
-    });
-};
-
-
-// Function to update an employee role
-const updateEmployeeRole = async (connection) => {
-  connection.query(`SELECT * FROM role;`, (err, res) => {
-    if (err) throw err;
-    let roles = res.map((role) => ({ name: role.title, value: role.role_id }));
-    connection.query(`SELECT * FROM employee;`, (err, res) => {
-      if (err) throw err;
-      let employees = res.map((employee) => ({
-        name: employee.first_name + ' ' + employee.last_name,
-        value: employee.employee_id,
-      }));
-      inquirer
-        .prompt([
-          {
-            name: 'employee',
-            type: 'rawlist',
-            message: 'Which employee would you like to update the role for?',
-            choices: employees,
-          },
-          {
-            name: 'newRole',
-            type: 'rawlist',
-            message: "What should the employee's new role be?",
-            choices: roles,
-          },
-        ])
-        .then((response) => {
-          connection.query(
-            `UPDATE employee SET ? WHERE ?`,
-            [
-              {
-                role_id: response.newRole,
-              },
-              {
-                employee_id: response.employee,
-              },
-            ],
-            (err, res) => {
-              if (err) throw err;
-              console.log(
-                `\n Successfully updated employee's role in the database! \n`
-              );
-              startApp(connection);
-            }
-          );
-        });
-    });
-  });
-};
-
-// Function to update an employee's manager
-const updateManager = async (connection) => {
-  connection.query(`SELECT * FROM employee;`, (err, res) => {
-    if (err) throw err;
-    let employees = res.map((employee) => ({
-      name: employee.first_name + ' ' + employee.last_name,
-      value: employee.employee_id,
-    }));
-    inquirer
-      .prompt([
-        {
-          name: 'employee',
-          type: 'rawlist',
-          message: 'Which employee would you like to update the manager for?',
-          choices: employees,
-        },
-        {
-          name: 'newManager',
-          type: 'rawlist',
-          message: "Who should the employee's new manager be?",
-          choices: employees,
-        },
-      ])
-      .then((response) => {
-        connection.query(
-          `UPDATE employee SET ? WHERE ?`,
-          [
-            {
-              manager_id: response.newManager,
-            },
-            {
-              employee_id: response.employee,
-            },
-          ],
-          (err, res) => {
-            if (err) throw err;
-            console.log(
-              `\n Successfully updated employee's manager in the database! \n`
-            );
-            startApp(connection);
-          }
-        );
-      });
-  });
-};
-
-// Function to remove a department
-const removeDepartment = async (connection) => {
-  connection.query(
-    `SELECT * FROM department ORDER BY department_id ASC;`,
-    (err, res) => {
-      if (err) throw err;
-      let departments = res.map((department) => ({
-        name: department.department_name,
-        value: department.department_id,
-      }));
-      inquirer
-        .prompt([
-          {
-            name: 'deptName',
-            type: 'rawlist',
-            message: 'Which department would you like to remove?',
-            choices: departments,
-          },
-        ])
-        .then((response) => {
-          connection.query(
-            `DELETE FROM department WHERE ?`,
-            [
-              {
-                department_id: response.deptName,
-              },
-            ],
-            (err, res) => {
-              if (err) throw err;
-              console.log(
-                `\n Successfully removed the department from the database! \n`
-              );
-              startApp(connection);
-            }
-          );
-        });
+// Prompt user
+const startNewPrompt = async () => {
+  console.log("start");
+  const answer = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'initialPrompt',
+      message: 'What would you like to do?',
+      choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Update an employee manager', 'View employees by manager', 'View employees by department', 'Delete a department', 'Delete a role', 'Delete an employee'],
     }
-  );
+  ]);
+
+  if (answer.initialPrompt === 'View all departments') {
+    await viewDepartments();
+  } else if (answer.initialPrompt === 'View all roles') {
+    await viewRoles();
+  } else if (answer.initialPrompt === 'View all employees') {
+    await viewEmployees();
+  } else if (answer.initialPrompt === 'Add a department') {
+    await addDepartment();
+  } else if (answer.initialPrompt === 'Add a role') {
+    await addRole();
+  } else if (answer.initialPrompt === 'Add an employee') {
+    await addEmployee();
+  } else if (answer.initialPrompt === 'Update an employee role') {
+    await updateRole();
+  } else if (answer.initialPrompt === 'Update an employee manager') {
+    await updateManager();
+  } else if (answer.initialPrompt === 'View employees by manager') {
+    await viewByManager();
+  } else if (answer.initialPrompt === 'View employees by department') {
+    await viewByDepartment();
+  } else if (answer.initialPrompt === 'Delete a department') {
+    await deleteDepartment();
+  } else if (answer.initialPrompt === 'Delete a role') {
+    await deleteRole();
+  } else if (answer.initialPrompt === 'Delete an employee') {
+    await deleteEmployee();
+  } else {
+    console.log('Please select an action!');
+  }
 };
 
-// Function to remove a role
-const removeRole = async (connection) => {
-  connection.query(`SELECT * FROM role ORDER BY role_id ASC;`, (err, res) => {
-    if (err) throw err;
-    let roles = res.map((role) => ({
-      name: role.title,
-      value: role.role_id,
-    }));
-    inquirer
-      .prompt([
+async function viewDepartments() {
+  try {
+    const [rows] = await db.query("SELECT * FROM department");
+    console.log("\n");
+    console.table(rows);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+  startNewPrompt();
+}
+
+function viewRoles() {
+  db.getRoles()
+    .then(([rows]) => {
+      let roles = rows;
+      console.log("\n");
+      console.table(roles);
+    })
+    .then(() => startNewPrompt());
+}
+
+function viewEmployees() {
+  db.getEmployees()
+    .then(([rows]) => {
+      let employees = rows;
+      console.log("\n");
+      console.table(employees);
+    })
+    .then(() => startNewPrompt());
+}
+
+function addDepartment() {
+  inquirer.prompt([
+    {
+      name: 'name',
+      message: "What is the name of the department?"
+    },
+  ]).then(res => {
+    // CREATE a department
+    db.addDepartment(res.name)
+    console.log("The department has been added!")
+    startNewPrompt()
+  })
+}
+
+function addRole() {
+  //pass one array in
+  db.getDepartments()
+    .then(([departments]) => {
+      return inquirer.prompt([
         {
           name: 'title',
-          type: 'rawlist',
-          message: 'Which role would you like to remove?',
-          choices: roles,
+          message: "What is the name of the role?"
+        },
+        {
+          name: 'salary',
+          message: "What is the salary amount?"
+        },
+        {
+          type: 'list',
+          name: 'departmentPrompt',
+          message: "What is the role's department?",
+          //map each with name as display, value as return value
+          choices: departments.map(department => ({ name: department.name, value: department.id })),
         },
       ])
-      .then((response) => {
-        connection.query(
-          `DELETE FROM role WHERE ?`,
-          [
-            {
-              role_id: response.title,
-            },
-          ],
-          (err, res) => {
-            if (err) throw err;
-            console.log(
-              `\n Successfully removed the role from the database! \n`
-            );
-            startApp(connection);
-          }
-        );
-      });
-  });
-};
+    },
+      //destructure result object to FN, LM, etc.
+    ).then(({ title, salary, departmentPrompt }) => {
+      // CREATE a role
+      db.addRole(title, salary, departmentPrompt)
+      console.log("The role has been added!")
+      startNewPrompt()
+    })
+}
 
-// Function to remove an employee
-const removeEmployee = async (connection) => {
-  connection.query(
-    `SELECT * FROM employee ORDER BY employee_id ASC;`,
-    (err, res) => {
-      if (err) throw err;
-      let employees = res.map((employee) => ({
-        name: employee.first_name + ' ' + employee.last_name,
-        value: employee.employee_id,
-      }));
-      inquirer
-        .prompt([
-          {
-            name: 'employee',
-            type: 'rawlist',
-            message: 'Which employee would you like to remove?',
-            choices: employees,
-          },
-        ])
-        .then((response) => {
-          connection.query(
-            `DELETE FROM employee WHERE ?`,
-            [
-              {
-                employee_id: response.employee,
-              },
-            ],
-            (err, res) => {
-              if (err) throw err;
-              console.log(
-                `\n Successfully removed the employee from the database! \n`
-              );
-              startApp(connection);
-            }
-          );
-        });
+function addEmployee() {
+  //pass one array in
+  Promise.all([db.getRoles(), db.getManager()])
+    //array of roles, array of departments, destructured
+    .then(([[roles], [managers]]) => {
+      // console.log(roles[0]);
+      // console.log(managers[0]);
+      return inquirer.prompt([
+        {
+          name: 'first_name',
+          message: "What is the employee's first name?"
+        },
+        {
+          name: 'last_name',
+          message: "What is the employee's last name?"
+        },
+        {
+          type: 'list',
+          name: 'rolePrompt',
+          message: "What is the employee's role?",
+          //map each with name as display, value as return value
+          choices: roles.map(role => ({ name: role.title, value: role.id })),
+        },
+        {
+          type: 'list',
+          name: 'managerPrompt',
+          message: "What is the employee's manager?",
+          //array
+          choices: managers.map(manager => ({ name: `${manager.first_name} ${manager.last_name}`, value: manager.id })),
+        }
+      ])
     }
-  );
-};
+      //destructure result object to FN, LM, RP, MP 
+    ).then(({ first_name, last_name, rolePrompt, managerPrompt }) => {
+      // CREATE an employee
+      db.addEmployee(first_name, last_name, rolePrompt, managerPrompt)
+      console.log("The employee has been added!")
+      startNewPrompt()
+    })
+}
 
-// Function to view a department's salary
-const viewDepartmentSalary = async (connection) => {
-  connection.query(
-    `SELECT * FROM department ORDER BY department_id ASC;`,
-    (err, res) => {
-      if (err) throw err;
-      let departments = res.map((department) => ({
-        name: department.department_name,
-        value: department.department_id,
-      }));
-      inquirer
-        .prompt([
-          {
-            name: 'deptName',
-            type: 'rawlist',
-            message: 'Which department would you like to view the total salaries of?',
-            choices: departments,
-          },
-        ])
-        .then((response) => {
-          connection.query(
-            `SELECT department_id, SUM(role.salary) AS total_salary FROM role WHERE ?`,
-            [
-              {
-                department_id: response.deptName,
-              },
-            ],
-            (err, res) => {
-              if (err) throw err;
-              console.log(
-                `\n The total utilized salary budget of the ${response.deptName} department is $ \n`
-              );
-              console.table('\n', res, '\n');
-              startApp(connection);
-            }
-          );
+//ask which role to change to to use as input
+function updateRole() {
+  //pass one array in
+  db.getEmployees()
+    .then(([employees]) => {
+      inquirer.prompt([
+        {
+          type: 'list',
+          name: 'employeePrompt',
+          message: "Which employee do you want to update?",
+          //map each with name as display, value as return value. Map with employee object array
+          choices: employees.map(employee => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.id })),
+        }
+      ])
+        .then(res => {
+          let employee_id = res.employeePrompt;
+          db.getRoles()
+            .then(([roles]) => {
+              inquirer.prompt([
+                {
+                  type: 'list',
+                  name: 'rolePrompt',
+                  message: "What role do you want to update the employee to?",
+                  //map each with name as display, value as return value
+                  choices: roles.map(role => ({ name: role.title, value: role.id })),
+                }
+              ])
+                .then(res => db.updateRole(employee_id, res.rolePrompt))
+                .then(() => console.log("The employee's role has been updated!"))
+                .then(() => startNewPrompt())
+
+            });
         });
-    }
-  );
+    });
 };
 
-module.exports = {
-  addEmployee,
-  updateEmployeeRole,
-  updateManager,
-  removeDepartment,
-  removeRole,
-  removeEmployee,
-  viewDepartmentSalary,
+//ask which role to change to to use as input
+function updateManager() {
+  //pass one array in
+  db.getEmployees()
+    .then(([employees]) => {
+      inquirer.prompt([
+        {
+          type: 'list',
+          name: 'employeePrompt',
+          message: "Which employee do you want to update?",
+          //map each with name as display, value as return value. Map with employee object array
+          choices: employees.map(employee => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.id })),
+        }
+      ])
+        .then(employee_res => {
+          let employee_id = employee_res.employeePrompt;
+          db.getEmployees()
+            .then(([employees]) => {
+              inquirer.prompt([
+                {
+                  type: 'list',
+                  name: 'managerPrompt',
+                  message: "Which manager do you want to update the employee to?",
+                  //map each with name as display, value as return value
+                  choices: employees.map(employee => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.id })),
+                }
+              ])
+                .then(manager_res => db.updateManager(employee_id, manager_res.managerPrompt))
+                .then(() => console.log("The employee's manager has been updated!"))
+                .then(() => startNewPrompt())
+
+            });
+        });
+    });
 };
+
+function viewByDepartment() {
+  //pass one array in
+  db.getDepartments()
+    .then(([departments]) => {
+      return inquirer.prompt([
+        {
+          type: 'list',
+          name: 'departmentPrompt',
+          message: "Which department do you want to view employees for?",
+          //map each with name as display, value as return value
+          choices: departments.map(department => ({ name: department.name, value: department.id })),
+        },
+      ])
+    },
+    ).then(department_res => {
+      db.viewByDepartment(department_res.departmentPrompt)
+        .then(([rows]) => {
+          let departments = rows;
+          console.log("\n");
+          console.table(departments);
+        }).then(() => startNewPrompt());
+    })
+};
+
+function viewByManager() {
+  //pass one array in
+  db.getEmployees()
+    .then(([employees]) => {
+      return inquirer.prompt([
+        {
+          type: 'list',
+          name: 'managerPrompt',
+          message: "Which manager do you want to view employees for?",
+          //map each with name as display, value as return value
+          choices: employees.map(employee => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.id })),
+        },
+      ])
+    },
+    ).then(manager_res => {
+      db.viewByManager(manager_res.managerPrompt)
+        .then(([rows]) => {
+          let employees = rows;
+          console.log("\n");
+          console.table(employees);
+        }).then(() => startNewPrompt());
+    })
+};
+
+function deleteDepartment() {
+  //pass one array in
+  db.getDepartments()
+    .then(([departments]) => {
+      return inquirer.prompt([
+        {
+          type: 'list',
+          name: 'departmentPrompt',
+          message: "Which department do you want to delete?",
+          //map each with name as display, value as return value
+          choices: departments.map(department => ({ name: department.name, value: department.id })),
+        },
+      ])
+    },
+    ).then(({ departmentPrompt }) => {
+      db.deleteDepartment(departmentPrompt)
+      console.log("The department has been deleted!")
+      startNewPrompt()
+    })
+}
+
+function deleteRole() {
+  //pass one array in
+  db.getRoles()
+    .then(([roles]) => {
+      return inquirer.prompt([
+        {
+          type: 'list',
+          name: 'rolePrompt',
+          message: "Which role do you want to delete?",
+          //map each with name as display, value as return value
+          choices: roles.map(role => ({ name: role.title, value: role.id })),
+        },
+      ])
+    },
+    ).then(({ rolePrompt }) => {
+      db.deleteRole(rolePrompt)
+      console.log("The role has been deleted!")
+      startNewPrompt()
+    })
+}
+
+function deleteEmployee() {
+  //pass one array in
+  db.getEmployees()
+    .then(([employees]) => {
+      return inquirer.prompt([
+        {
+          type: 'list',
+          name: 'employeePrompt',
+          message: "Which employee do you want to delete?",
+          //map each with name as display, value as return value
+          choices: employees.map(employee => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.id })),
+        },
+      ])
+    },
+    ).then(({ employeePrompt }) => {
+      db.deleteEmployee(employeePrompt)
+      console.log("The employee has been deleted!")
+      startNewPrompt()
+    })
+}
+
+// view the total combined salaries in a department
+
+// function call to initialize program
+startNewPrompt();
