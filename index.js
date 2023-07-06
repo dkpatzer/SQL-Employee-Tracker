@@ -201,6 +201,26 @@ function updateRole() {
     });
 }
 
+function deleteRole() {
+  db.getRoles()
+    .then(([roles]) => {
+      return inquirer.prompt([
+        {
+          type: 'list',
+          name: 'rolePrompt',
+          message: "Which role do you want to delete?",
+          choices: roles.map(role => ({ name: role.title, value: role.id })),
+        },
+      ]);
+    })
+    .then(({ rolePrompt }) => {
+      db.deleteRole(rolePrompt);
+      console.log("The role has been deleted!");
+      startNewPrompt();
+    });
+}
+
+
 function updateManager() {
   db.getEmployees()
     .then(([employees]) => {
