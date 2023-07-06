@@ -1,18 +1,16 @@
-const connection = require('./db/database');
-
+const connection = require('./database');
 
 class EmployeeDatabase {
   constructor(connection) {
     this.connection = connection;
   }
 
-  // Methods
-
+  //methods
   getDepartments() {
     return this.connection.promise().query(
       "SELECT * FROM department"
     );
-  }
+  };
 
   getRoles() {
     return this.connection.promise().query(
@@ -21,7 +19,7 @@ class EmployeeDatabase {
         LEFT JOIN department 
         ON role.department_id = department.id`
     );
-  }
+  };
 
   getEmployees() {
     return this.connection.promise().query(
@@ -34,51 +32,55 @@ class EmployeeDatabase {
         LEFT JOIN employee manager 
         ON manager.id = employee.manager_id;`
     );
-  }
+  };
 
+  //used in add employee
   getManager() {
     return this.connection.promise().query(
       "SELECT * FROM employee"
     );
-  }
+  };
 
+  //res.name
   addDepartment(name) {
     return this.connection.promise().query(
       `INSERT INTO department(name) 
-        VALUES (?)`,
-      name
-    );
-  }
+        VALUES(?)`
+      //name to replace "?"
+      , name)
+  };
 
   addRole(title, salary, department_id) {
     return this.connection.promise().query(
       `INSERT INTO role(title, salary, department_id) 
-        VALUES (?, ?, ?)`,
-      [title, salary, department_id]
-    );
-  }
+        VALUES(?,?,?)`
+      //to replace "?"
+      , [title, salary, department_id])
+  };
 
+  //res.firsname, etc., rolePrompt, managerPrompt
   addEmployee(first_name, last_name, role_id, manager_id) {
     return this.connection.promise().query(
       `INSERT INTO employee(first_name, last_name, role_id, manager_id) 
-        VALUES (?, ?, ?, ?)`,
-      [first_name, last_name, role_id, manager_id]
-    );
-  }
+        VALUES(?,?,?,?)`
+      // to replace "?"
+      , [first_name, last_name, role_id, manager_id])
+  };
 
   updateRole(employee_id, role_id) {
     return this.connection.promise().query(
       `UPDATE employee SET role_id = ? WHERE id = ?`,
-      [role_id, employee_id]
-    );
-  }
+      // to replace "?"
+      [role_id, employee_id])
+  };
 
+  //BONUS
   updateManager(employee_id, manager_id) {
     return this.connection.promise().query(
       `UPDATE employee SET manager_id = ? WHERE id = ?`,
-      [manager_id, employee_id]
-    );
-  }
+      // to replace "?"
+      [manager_id, employee_id])
+  };
 
   viewByManager(manager_id) {
     return this.connection.promise().query(
@@ -89,9 +91,8 @@ class EmployeeDatabase {
         LEFT JOIN department 
         ON department.id = role.department_id 
         WHERE manager_id = ?`,
-      manager_id
-    );
-  }
+      manager_id)
+  };
 
   viewByDepartment(department_id) {
     return this.connection.promise().query(
@@ -102,33 +103,30 @@ class EmployeeDatabase {
         LEFT JOIN department 
         ON department.id = role.department_id 
         WHERE department.id = ?`,
-      department_id
-    );
-  }
+      department_id)
+  };
 
   deleteDepartment(id) {
     return this.connection.promise().query(
-      `DELETE FROM department WHERE id = ?`,
-      id
-    );
-  }
+      `DELETE FROM department WHERE id = ?`
+      , id)
+  };
 
   deleteRole(id) {
     return this.connection.promise().query(
-      `DELETE FROM role WHERE id = ?`,
-      id
-    );
-  }
+      `DELETE FROM role WHERE id = ?`
+      , id)
+  };
 
   deleteEmployee(id) {
     return this.connection.promise().query(
-      `DELETE FROM employee WHERE id = ?`,
-      id
-    );
-  }
-}
+      `DELETE FROM employee WHERE id = ?`
+      , id)
+  };
 
-module.exports = new EmployeeDatabase(connection);
+};
+
+module.exports = EmployeeDatabase;
 
 
 
