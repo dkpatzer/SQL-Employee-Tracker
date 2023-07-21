@@ -5,15 +5,15 @@ const connection = mysql.createConnection({
   // Your username
   user: "root",
   // Your password
-  password: "",
-  database: "employees"
+  password: "Password1",
+  database: "sql_employee_tracker"
 });
 
 connection.connect(function (err) {
   if (err) throw err;
 });
 
-module.exports = connec
+module.exports = connection;
 
 
 

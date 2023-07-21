@@ -1,12 +1,16 @@
 -- Insert department data
-INSERT INTO department (name) VALUES
+INSERT INTO department 
+    (name)
+ VALUES
   ('Medical Services Department'),
   ('Administrative Department'),
   ('Laboratory Department'),
   ('Research and Development Department');
 
 -- Insert role data
-INSERT INTO role (title, salary, department_id) VALUES
+INSERT INTO role 
+      (title, salary, department_id) 
+VALUES
   ('Medical Office Manager', 80000.00, 1),
   ('Medical Billing Specialist', 55000.00, 1),
   ('Medical Records Coordinator', 40000.00, 1),
@@ -21,7 +25,9 @@ INSERT INTO role (title, salary, department_id) VALUES
   ('Grants Coordinator', 55000.00, 4);
 
 -- Insert employee data
-INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES
+INSERT INTO employee 
+     (first_name, last_name, role_id, manager_id) 
+VALUES
   ('John', 'Smith', 1, NULL), -- Medical Office Manager
   ('Emily', 'Johnson', 2, 1), -- Medical Billing Specialist with manager ID 1
   ('Michael', 'Williams', 3, 1), -- Medical Records Coordinator with manager ID 1
