@@ -57,7 +57,7 @@ THEN you are presented with the job title, role id, the department that role bel
 
 ## Images
 
-
+[SQL Walkthrough](https://drive.google.com/file/d/1RKv4IB7-AmFjWGIoeABLEVRWEFgnrl29/view)
 
 
 ## Credits
